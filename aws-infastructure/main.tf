@@ -70,7 +70,7 @@ resource "aws_vpc_security_group_ingress_rule" "app-sg-inbound-rule_1" {
   to_port     = 22
 }
 
-# Ultra wichtig !!!!!!! sonst wird nix installiert
+# Ultrawichtige Outbound Rule! Wenn nicht vorhanden, dann kann die EC2 Instanz nichts installieren!
 resource "aws_vpc_security_group_egress_rule" "app-sg-outbound-rule" {
   security_group_id = aws_security_group.app-sg.id
     ip_protocol        = "-1"
@@ -97,24 +97,60 @@ resource "aws_route_table_association" "route-table-association" {
   route_table_id = aws_route_table.public-route-table.id
 }
 
+# IAM Role, Policies and Profile
+resource "aws_iam_role" "s3_dynamo_db_full_access" {
+  name = "S3DynamoDBFullAccessRole"
+
+   assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "s3_full_access" {
+  role       = aws_iam_role.s3_dynamo_db_full_access.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "dynamodb_full_access" {
+  role       = aws_iam_role.s3_dynamo_db_full_access.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name="ec2-profile"
+  role = aws_iam_role.s3_dynamo_db_full_access.name
+}
+
 # EC2 Instances
 resource "aws_instance" "app-server" {
+  count = 2
   ami           = "ami-0122fd36a4f50873a"
   instance_type = "t2.micro"
   key_name      = "Webserver"
   user_data_replace_on_change = true
-
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
+  
   vpc_security_group_ids = [aws_security_group.app-sg.id]
-  subnet_id              = element(aws_subnet.subnets.*.id, 0)
+  subnet_id              = element(aws_subnet.subnets.*.id, count.index)
   user_data              = file("install-employee-dir-app.sh")
 
   tags = {
-    Name = "employee-app-server-1"
+    Name = "employee-app-server-${count.index + 1}"
   }
 }
 
 
-# IAM 
+
 # Dynamo DB
 # S3 Bucket
 # Loadbalancer
