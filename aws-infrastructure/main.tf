@@ -73,8 +73,8 @@ resource "aws_vpc_security_group_ingress_rule" "app-sg-inbound-rule_1" {
 # Ultrawichtige Outbound Rule! Wenn nicht vorhanden, dann kann die EC2 Instanz nichts installieren!
 resource "aws_vpc_security_group_egress_rule" "app-sg-outbound-rule" {
   security_group_id = aws_security_group.app-sg.id
-    ip_protocol        = "-1"
-    cidr_ipv4     = "0.0.0.0/0"
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
 }
 
 # Route Table and Associations
@@ -101,7 +101,7 @@ resource "aws_route_table_association" "route-table-association" {
 resource "aws_iam_role" "s3_dynamo_db_full_access" {
   name = "S3DynamoDBFullAccessRole"
 
-   assume_role_policy = jsonencode({
+  assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
@@ -127,19 +127,19 @@ resource "aws_iam_role_policy_attachment" "dynamodb_full_access" {
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name="ec2-profile"
+  name = "ec2-profile"
   role = aws_iam_role.s3_dynamo_db_full_access.name
 }
 
 # EC2 Instances
 resource "aws_instance" "app-server" {
-  count = 2
-  ami           = "ami-0122fd36a4f50873a"
-  instance_type = "t2.micro"
-  key_name      = "Webserver"
+  count                       = 2
+  ami                         = "ami-0122fd36a4f50873a"
+  instance_type               = "t2.micro"
+  key_name                    = "Webserver"
   user_data_replace_on_change = true
-  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
-  
+  iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
+
   vpc_security_group_ids = [aws_security_group.app-sg.id]
   subnet_id              = element(aws_subnet.subnets.*.id, count.index)
   user_data              = file("install-employee-dir-app.sh")
