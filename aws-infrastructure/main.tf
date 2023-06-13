@@ -155,3 +155,4 @@ resource "aws_instance" "app-server" {
 # S3 Bucket
 # Loadbalancer
 # Auto Scaling Group
+# Monitoring
