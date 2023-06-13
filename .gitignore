@@ -1,0 +1,2 @@
+# ignore terraform providers
+aws-infrastructure/.terraform/
