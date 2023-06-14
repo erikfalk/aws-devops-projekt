@@ -149,9 +149,21 @@ resource "aws_instance" "app-server" {
   }
 }
 
+# Dynamo DB Table
+resource "aws_dynamodb_table" "employees" {
+  name = "Employees"
+  billing_mode = "PROVISIONED"
+  hash_key = "id"
+  read_capacity = 20
+  write_capacity = 20
 
+  attribute {
+    name = "id"
+    type = "S"
+  }
+  
+}
 
-# Dynamo DB
 # S3 Bucket
 # Loadbalancer
 # Auto Scaling Group
