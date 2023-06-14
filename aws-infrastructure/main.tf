@@ -166,6 +166,7 @@ resource "aws_dynamodb_table" "employees" {
 # S3 Bucket, Policy
 resource "aws_s3_bucket" "employee-photo-bucket" {
   bucket = "employee-photo-bucket-ef-24241"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_policy" "allow_s3_read_access" {
