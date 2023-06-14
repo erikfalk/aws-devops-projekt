@@ -151,20 +151,46 @@ resource "aws_instance" "app-server" {
 
 # Dynamo DB Table
 resource "aws_dynamodb_table" "employees" {
-  name = "Employees"
-  billing_mode = "PROVISIONED"
-  hash_key = "id"
-  read_capacity = 20
+  name           = "Employees"
+  billing_mode   = "PROVISIONED"
+  hash_key       = "id"
+  read_capacity  = 20
   write_capacity = 20
 
   attribute {
     name = "id"
     type = "S"
   }
-  
 }
 
-# S3 Bucket
+# S3 Bucket, Policy
+resource "aws_s3_bucket" "employee-photo-bucket" {
+  bucket = "employee-photo-bucket-ef-24241"
+}
+
+resource "aws_s3_bucket_policy" "allow_s3_read_access" {
+  bucket = aws_s3_bucket.employee-photo-bucket.id
+  policy = data.aws_iam_policy_document.allow_s3_read_access.json
+}
+
+data "aws_iam_policy_document" "allow_s3_read_access" {
+  statement {
+    sid = "AllowS3ReadAccess"
+    principals {
+      type = "AWS"
+
+      identifiers = ["arn:aws:iam::032798421413:role/S3DynamoDBFullAccessRole"]
+    }
+
+    actions = ["s3:*"]
+
+    resources = [
+      aws_s3_bucket.employee-photo-bucket.arn,
+      "${aws_s3_bucket.employee-photo-bucket.arn}/*",
+    ]
+  }
+}
+
 # Loadbalancer
 # Auto Scaling Group
 # Monitoring
