@@ -1,2 +1,3 @@
 # ignore terraform providers
 aws-infrastructure/.terraform/
+aws-infrastructure/terraform.tfstate
