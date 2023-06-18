@@ -70,7 +70,6 @@ resource "aws_vpc_security_group_ingress_rule" "app-sg-inbound-rule_1" {
   to_port     = 22
 }
 
-# Ultrawichtige Outbound Rule! Wenn nicht vorhanden, dann kann die EC2 Instanz nichts installieren!
 resource "aws_vpc_security_group_egress_rule" "app-sg-outbound-rule" {
   security_group_id = aws_security_group.app-sg.id
   ip_protocol       = "-1"
@@ -132,21 +131,14 @@ resource "aws_iam_instance_profile" "ec2_profile" {
 }
 
 # EC2 Instances
-resource "aws_instance" "app-servers" {
-  count                       = 2
-  ami                         = "ami-0122fd36a4f50873a"
-  instance_type               = "t2.micro"
-  key_name                    = "Webserver"
-  user_data_replace_on_change = true
-  iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
+variable "min_instance_count" {
+  description = "Number of minimum instances to create"
+  default     = 2
+}
 
-  vpc_security_group_ids = [aws_security_group.app-sg.id]
-  subnet_id              = element(aws_subnet.subnets.*.id, count.index)
-  user_data              = file("install-employee-dir-app.sh")
-
-  tags = {
-    Name = "employee-app-server-${count.index + 1}"
-  }
+variable "instance_name" {
+  description = "Prefix for instance names"
+  default     = "employee-dir-app-server"
 }
 
 # Dynamo DB Table
@@ -167,6 +159,7 @@ resource "aws_dynamodb_table" "employees" {
 resource "aws_s3_bucket" "employee-photo-bucket" {
   bucket        = "employee-photo-bucket-ef-24241"
   force_destroy = true
+   
 }
 
 resource "aws_s3_bucket_policy" "allow_s3_read_access" {
@@ -179,7 +172,6 @@ data "aws_iam_policy_document" "allow_s3_read_access" {
     sid = "AllowS3ReadAccess"
     principals {
       type = "AWS"
-
       identifiers = ["arn:aws:iam::032798421413:role/S3DynamoDBFullAccessRole"]
     }
 
@@ -192,7 +184,7 @@ data "aws_iam_policy_document" "allow_s3_read_access" {
   }
 }
 
-# Loadbalancer, Target Group, Target Group Listener and Target Group Attachment
+# Loadbalancer, Target Group and Target Group Listener
 resource "aws_lb" "app-lb" {
   name               = "app-lb"
   internal           = false
@@ -266,14 +258,94 @@ resource "aws_vpc_security_group_egress_rule" "load-balancer-sg-outbound-rule" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-resource "aws_lb_target_group_attachment" "app-tg-attachment" {
-  count            = 2
-  target_group_arn = aws_lb_target_group.app-target-group.arn
-  target_id        = element(aws_instance.app-servers.*.id, count.index)
-  port             = 80
+# Launch Template
+resource "aws_launch_template" "app-server-launch-template" {
+  name          = "app-server-template"
+  image_id      = "ami-0122fd36a4f50873a"
+  instance_type = "t2.micro"
+
+  key_name  = "Webserver"
+  user_data = filebase64("install-employee-dir-app.sh")
+
+  iam_instance_profile {
+    arn = aws_iam_instance_profile.ec2_profile.arn
+  }
+
+  network_interfaces {
+    security_groups             = [aws_security_group.app-sg.id]
+    associate_public_ip_address = true
+    delete_on_termination       = true
+  }
+
 }
 
+# Auto Scaling Group and policy
+resource "aws_autoscaling_group" "app-auto-scaling-group" {
+  name     = "app-auto-scaling-group"
+  min_size = 2
+  max_size = 4
 
-# Launch Template
-# Auto Scaling Group
+  health_check_type         = "ELB"
+  health_check_grace_period = 300
+  target_group_arns         = [aws_lb_target_group.app-target-group.arn]
+
+  launch_template {
+    id      = aws_launch_template.app-server-launch-template.id
+    version = "$Latest"
+  }
+
+  vpc_zone_identifier = [aws_subnet.subnets[0].id, aws_subnet.subnets[1].id]
+
+  tag {
+    key                 = "Name"
+    value               = var.instance_name
+    propagate_at_launch = true
+  }
+
+}
+
+resource "aws_autoscaling_policy" "app-auto-scaling-policy" {
+  name                      = "app-auto-scaling-policy"
+  policy_type               = "TargetTrackingScaling"
+  autoscaling_group_name    = aws_autoscaling_group.app-auto-scaling-group.name
+  estimated_instance_warmup = 300
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+
+    }
+
+    target_value = 60.0
+
+  }
+}
+
+# Auto Scaling Notifications
+resource "aws_sns_topic" "app-server-scaling-topic" {
+  name = "app-server-scaling-topic"
+  
+}
+
+resource "aws_sns_topic_subscription" "app-server-scalling-sub" {
+  topic_arn = aws_sns_topic.app-server-scaling-topic.arn
+  protocol = "email"
+  endpoint = "erik-falk@web.de"
+}
+
+resource "aws_autoscaling_notification" "app-server-asg-notifications" {
+  group_names = [
+    aws_autoscaling_group.app-auto-scaling-group.name
+  ]
+
+  notifications = [
+    "autoscaling:EC2_INSTANCE_LAUNCH",
+    "autoscaling:EC2_INSTANCE_TERMINATE",
+    "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+    "autoscaling:EC2_INSTANCE_TERMINATE_ERROR",
+  ]
+
+  topic_arn = aws_sns_topic.app-server-scaling-topic.arn
+}
+
 # Monitoring
