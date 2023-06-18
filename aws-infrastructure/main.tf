@@ -161,6 +161,12 @@ resource "aws_s3_bucket" "employee-photo-bucket" {
   force_destroy = true
    
 }
+resource "aws_s3_bucket_public_access_block" "example" {
+  bucket = aws_s3_bucket.employee-photo-bucket.id
+
+  block_public_acls   = false
+  block_public_policy = false
+}
 
 resource "aws_s3_bucket_policy" "allow_s3_read_access" {
   bucket = aws_s3_bucket.employee-photo-bucket.id
@@ -276,7 +282,6 @@ resource "aws_launch_template" "app-server-launch-template" {
     associate_public_ip_address = true
     delete_on_termination       = true
   }
-
 }
 
 # Auto Scaling Group and policy
@@ -301,7 +306,6 @@ resource "aws_autoscaling_group" "app-auto-scaling-group" {
     value               = var.instance_name
     propagate_at_launch = true
   }
-
 }
 
 resource "aws_autoscaling_policy" "app-auto-scaling-policy" {
@@ -323,8 +327,7 @@ resource "aws_autoscaling_policy" "app-auto-scaling-policy" {
 
 # Auto Scaling Notifications
 resource "aws_sns_topic" "app-server-scaling-topic" {
-  name = "app-server-scaling-topic"
-  
+  name = "app-server-scaling-topic" 
 }
 
 resource "aws_sns_topic_subscription" "app-server-scalling-sub" {
