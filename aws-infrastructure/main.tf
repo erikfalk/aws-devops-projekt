@@ -96,9 +96,9 @@ resource "aws_route_table_association" "route-table-association" {
   route_table_id = aws_route_table.public-route-table.id
 }
 
-# IAM Role, Policies and Profile
-resource "aws_iam_role" "s3_dynamo_db_full_access" {
-  name = "S3DynamoDBFullAccessRole"
+# IAM Roles, Policies and Profile
+resource "aws_iam_role" "s3_dynamo_db_full_access_deploy_role" {
+  name = "S3DynamoDBFullAccessCodeDeployRole"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -115,19 +115,29 @@ resource "aws_iam_role" "s3_dynamo_db_full_access" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "s3_full_access" {
-  role       = aws_iam_role.s3_dynamo_db_full_access.name
+resource "aws_iam_role_policy_attachment" "AmazonS3FullAccess" {
+  role       = aws_iam_role.s3_dynamo_db_full_access_deploy_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "dynamodb_full_access" {
-  role       = aws_iam_role.s3_dynamo_db_full_access.name
+resource "aws_iam_role_policy_attachment" "AmazonDynamoDBFullAccess" {
+  role       = aws_iam_role.s3_dynamo_db_full_access_deploy_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "AmazonEC2RoleforAWSCodeDeploy" {
+  role       = aws_iam_role.s3_dynamo_db_full_access_deploy_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforAWSCodeDeploy"
+}
+
+resource "aws_iam_role_policy_attachment" "AmazonSSMManagedInstanceCore" {
+  role       = aws_iam_role.s3_dynamo_db_full_access_deploy_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "ec2-profile"
-  role = aws_iam_role.s3_dynamo_db_full_access.name
+  role = aws_iam_role.s3_dynamo_db_full_access_deploy_role.name
 }
 
 # Dynamo DB Table
