@@ -2,3 +2,4 @@
 aws-infrastructure/.terraform/
 aws-infrastructure/terraform.tfstate
 aws-infrastructure/terraform.tfstate.backup
+aws-infrastructure/.terraform.tfstate.lock.info

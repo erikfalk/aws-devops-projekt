@@ -130,17 +130,6 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   role = aws_iam_role.s3_dynamo_db_full_access.name
 }
 
-# EC2 Instances
-variable "min_instance_count" {
-  description = "Number of minimum instances to create"
-  default     = 2
-}
-
-variable "instance_name" {
-  description = "Prefix for instance names"
-  default     = "employee-dir-app-server"
-}
-
 # Dynamo DB Table
 resource "aws_dynamodb_table" "employees" {
   name           = "Employees"
@@ -159,9 +148,9 @@ resource "aws_dynamodb_table" "employees" {
 resource "aws_s3_bucket" "employee-photo-bucket" {
   bucket        = "employee-photo-bucket-ef-24241"
   force_destroy = true
-   
 }
-resource "aws_s3_bucket_public_access_block" "example" {
+
+resource "aws_s3_bucket_public_access_block" "app-s3-public-access" {
   bucket = aws_s3_bucket.employee-photo-bucket.id
 
   block_public_acls   = false
@@ -177,7 +166,7 @@ data "aws_iam_policy_document" "allow_s3_read_access" {
   statement {
     sid = "AllowS3ReadAccess"
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = ["arn:aws:iam::032798421413:role/S3DynamoDBFullAccessRole"]
     }
 
@@ -284,11 +273,27 @@ resource "aws_launch_template" "app-server-launch-template" {
   }
 }
 
-# Auto Scaling Group and policy
+# EC2 Instances Vars
+variable "min_instance_count" {
+  description = "Number of minimum instances to create"
+  default     = 2
+}
+
+variable "max_instance_count" {
+  description = "Number of maximum instances to create"
+  default     = 4
+}
+
+variable "instance_name" {
+  description = "Prefix for instance names"
+  default     = "employee-dir-app-server"
+}
+
+# Auto Scaling Group and Policy
 resource "aws_autoscaling_group" "app-auto-scaling-group" {
   name     = "app-auto-scaling-group"
-  min_size = 2
-  max_size = 4
+  min_size = var.min_instance_count
+  max_size = var.max_instance_count
 
   health_check_type         = "ELB"
   health_check_grace_period = 300
@@ -327,13 +332,13 @@ resource "aws_autoscaling_policy" "app-auto-scaling-policy" {
 
 # Auto Scaling Notifications
 resource "aws_sns_topic" "app-server-scaling-topic" {
-  name = "app-server-scaling-topic" 
+  name = "app-server-scaling-topic"
 }
 
 resource "aws_sns_topic_subscription" "app-server-scalling-sub" {
   topic_arn = aws_sns_topic.app-server-scaling-topic.arn
-  protocol = "email"
-  endpoint = "erik-falk@web.de"
+  protocol  = "email"
+  endpoint  = "erik-falk@web.de"
 }
 
 resource "aws_autoscaling_notification" "app-server-asg-notifications" {
@@ -352,3 +357,71 @@ resource "aws_autoscaling_notification" "app-server-asg-notifications" {
 }
 
 # Monitoring
+resource "aws_cloudwatch_dashboard" "app_dashboard" {
+  dashboard_name = "employee-app-dashboard"
+
+  dashboard_body = jsonencode(
+    {
+      "widgets" : [
+        {
+          "type" : "text",
+          "x" : 0,
+          "y" : 0,
+          "width" : 5,
+          "height" : 1
+          "properties" : {
+            "markdown" : "### Welcome to the Employee Directory App Dashboard"
+          }
+        },
+        {
+          "type" : "metric",
+          "x" : 0,
+          "y" : 3,
+          "width" : 12,
+          "height" : 6,
+          "properties" : {
+            "metrics" : [
+              ["AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "app-auto-scaling-group", { "label" : "CPU Utilization", "color" : "#FF0000" }]
+            ],
+            "view" : "timeSeries",
+            "stacked" : false,
+            "region" : "eu-central-1",
+            "title" : "CPU Utilization"
+          }
+        },
+        {
+          "type" : "metric",
+          "x" : 0,
+          "y" : 3,
+          "width" : 12,
+          "height" : 6,
+          "properties" : {
+            "metrics" : [
+              ["AWS/EC2", "NetworkIn", "AutoScalingGroupName", "app-auto-scaling-group", { "label" : "Network In", "color" : "#FF0000" }]
+            ],
+            "view" : "timeSeries",
+            "stacked" : false,
+            "region" : "eu-central-1",
+            "title" : "Network In"
+          }
+        },
+        {
+          "type" : "metric",
+          "x" : 0,
+          "y" : 3,
+          "width" : 12,
+          "height" : 6,
+          "properties" : {
+            "metrics" : [
+              ["AWS/EC2", "NetworkOut", "AutoScalingGroupName", "app-auto-scaling-group", { "label" : "Network Out", "color" : "#FF0000" }]
+            ],
+            "view" : "timeSeries",
+            "stacked" : false,
+            "region" : "eu-central-1",
+            "title" : "Network Out"
+          }
+        }
+      ]
+    }
+  )
+}
