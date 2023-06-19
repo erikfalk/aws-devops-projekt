@@ -3,10 +3,10 @@ os: linux
 files:
   - source: /FlaskApp/
     destination: /usr/local/bin/flask
-hooks:
-   ApplicationStart:
-    - location: /usr/local/bin/flask run --host=0.0.0.0 --port=80
-      timeout: 300
-      runas: root
+# hooks:
+#    ApplicationStart:
+#     - location: /usr/local/bin/flask run --host=0.0.0.0 --port=80
+#       timeout: 300
+#       runas: root
 
 
