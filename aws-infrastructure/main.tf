@@ -148,6 +148,7 @@ resource "aws_dynamodb_table" "employees" {
 resource "aws_s3_bucket" "employee-photo-bucket" {
   bucket        = "employee-photo-bucket-ef-24241"
   force_destroy = true
+  
 }
 
 resource "aws_s3_bucket_public_access_block" "app-s3-public-access" {
