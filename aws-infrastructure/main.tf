@@ -170,15 +170,15 @@ resource "aws_s3_bucket_public_access_block" "app-s3-public-access" {
 
 resource "aws_s3_bucket_policy" "allow_s3_read_access" {
   bucket = aws_s3_bucket.employee-photo-bucket.id
-  policy = data.aws_iam_policy_document.allow_s3_read_access.json
+  policy = data.aws_iam_policy_document.allow_s3_read_access_doc.json
 }
 
-data "aws_iam_policy_document" "allow_s3_read_access" {
+data "aws_iam_policy_document" "allow_s3_read_access_doc" {
   statement {
     sid = "AllowS3ReadAccess"
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::032798421413:role/S3DynamoDBFullAccessRole"]
+      identifiers = ["arn:aws:iam::032798421413:role/S3DynamoDBFullAccessCodeDeployRole"]
     }
 
     actions = ["s3:*"]
@@ -336,8 +336,7 @@ resource "aws_autoscaling_policy" "app-auto-scaling-policy" {
 
     }
 
-    target_value = 60.0
-
+    target_value = 70.0
   }
 }
 

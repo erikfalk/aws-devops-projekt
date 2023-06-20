@@ -1,10 +1,16 @@
 #!/bin/bash -ex
+yum update
 wget https://aws-tc-largeobjects.s3-us-west-2.amazonaws.com/DEV-AWS-MO-GCNv2/FlaskApp.zip
 unzip FlaskApp.zip
 cd FlaskApp/
 yum -y install python3-pip
 pip install -r requirements.txt
 yum -y install stress
+cd /
+yum install ruby
+wget https://aws-codedeploy-eu-central-1.s3.eu-central-1.amazonaws.com/latest/install
+chmod +x ./install
+./install auto
 export PHOTOS_BUCKET=employee-photo-bucket-ef-24241
 export AWS_DEFAULT_REGION=eu-central-1
 export DYNAMO_MODE=on
