@@ -11,6 +11,7 @@ yum install ruby
 wget https://aws-codedeploy-eu-central-1.s3.eu-central-1.amazonaws.com/latest/install
 chmod +x ./install
 ./install auto
+cd FlaskApp/
 export PHOTOS_BUCKET=employee-photo-bucket-ef-24241
 export AWS_DEFAULT_REGION=eu-central-1
 export DYNAMO_MODE=on

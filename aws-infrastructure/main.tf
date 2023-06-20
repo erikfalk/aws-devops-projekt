@@ -292,7 +292,7 @@ variable "min_instance_count" {
 
 variable "max_instance_count" {
   description = "Number of maximum instances to create"
-  default     = 4
+  default     = 2
 }
 
 variable "instance_name" {
