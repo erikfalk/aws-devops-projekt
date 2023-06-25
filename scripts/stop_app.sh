@@ -1,2 +1,2 @@
 #!/bin/bash -ex
-pkill flask
+pkill -9 flask
