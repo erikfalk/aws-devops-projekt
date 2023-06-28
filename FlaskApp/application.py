@@ -287,4 +287,6 @@ def stress(seconds):
     return redirect(url_for("info"))
 
 if __name__ == "__main__":
-    application.run(debug=True)
+    from threading import Thread
+    Thread(target=run, deamon=True).start()
+    application.run(host='localhost', port=80)
