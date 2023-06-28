@@ -1,2 +1,2 @@
 #!/bin/bash -ex
-pkill flask
+sudo pkill flask
