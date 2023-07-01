@@ -1,7 +1,10 @@
 #!/bin/bash -ex
 yum update
-wget https://aws-tc-largeobjects.s3-us-west-2.amazonaws.com/DEV-AWS-MO-GCNv2/FlaskApp.zip
-unzip FlaskApp.zip
+wget https://github.com/erikfalk/aws-devops-projekt/archive/refs/heads/main.zip
+unzip main.zip
+cp -r aws-devops-projekt-main/FlaskApp/ /FlaskApp
+rm -f main.zip
+rm -rf aws-devops-projekt-main/
 cd FlaskApp/
 yum -y install python3-pip
 pip install -r requirements.txt
