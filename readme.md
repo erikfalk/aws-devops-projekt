@@ -1,1 +1,1 @@
-# Open Campus 2023 AWS DevOps Abschlussprojekt
+# Open Campus 2023 AWS DevOps final project
