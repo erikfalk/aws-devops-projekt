@@ -307,7 +307,7 @@ resource "aws_autoscaling_group" "app-auto-scaling-group" {
   max_size = var.max_instance_count
 
   health_check_type         = "ELB"
-  health_check_grace_period = 300
+  health_check_grace_period = 90
   target_group_arns         = [aws_lb_target_group.app-target-group.arn]
 
   launch_template {
@@ -328,7 +328,7 @@ resource "aws_autoscaling_policy" "app-auto-scaling-policy" {
   name                      = "app-auto-scaling-policy"
   policy_type               = "TargetTrackingScaling"
   autoscaling_group_name    = aws_autoscaling_group.app-auto-scaling-group.name
-  estimated_instance_warmup = 300
+  estimated_instance_warmup = 150
 
   target_tracking_configuration {
     predefined_metric_specification {
