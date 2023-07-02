@@ -208,9 +208,9 @@ resource "aws_lb_target_group" "app-target-group" {
 
   health_check {
     healthy_threshold   = 2
-    unhealthy_threshold = 5
-    timeout             = 30
-    interval            = 40
+    unhealthy_threshold = 2
+    timeout             = 5
+    interval            = 10
     port                = 80
   }
 }
@@ -292,7 +292,7 @@ variable "min_instance_count" {
 
 variable "max_instance_count" {
   description = "Number of maximum instances to create"
-  default     = 2
+  default     = 4
 }
 
 variable "instance_name" {
