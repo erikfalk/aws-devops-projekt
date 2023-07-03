@@ -1,3 +1,3 @@
 #!/bin/bash -ex
-rm -f FlaskApp.zip
+rm -f main.zip
 rm -rf /FlaskApp
