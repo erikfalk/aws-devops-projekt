@@ -2,17 +2,17 @@ version: 0.0
 os: linux
 files:
   - source: /FlaskApp
-    destination: /FlaskApp_Dump
-# hooks:
-#   ApplicationStop:
-#     - location: scripts/stop_app.sh
-#       timeout: 300
-#       runas: root
-#   BeforeInstall:
-#     - location: scripts/remove_app.sh
-#       timeout: 300
-#       runas: root
-#   ApplicationStart:
-#     - location: scripts/start_app.sh
-#       timeout: 300
-#       runas: root
+    destination: /FlaskApp
+hooks:
+  ApplicationStop:
+    - location: scripts/stop_app.sh
+      timeout: 300
+      runas: root
+  BeforeInstall:
+    - location: scripts/remove_app.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: scripts/start_app.sh
+      timeout: 300
+      runas: root
