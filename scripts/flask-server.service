@@ -6,7 +6,7 @@
  User=root
  Group=root
  WorkingDirectory=/FlaskApp
- ExecStart=python -m flask run --host=0.0.0.0 --port=80
+ ExecStart=python -m flask --app application.py run --host=0.0.0.0 --port=80
  Restart=always
 
  [Install]

@@ -16,9 +16,9 @@ wget https://aws-codedeploy-eu-central-1.s3.eu-central-1.amazonaws.com/latest/in
 chmod +x ./install
 ./install auto
 cd FlaskApp/
-export PHOTOS_BUCKET=employee-photo-bucket-ef-24241
-export AWS_DEFAULT_REGION=eu-central-1
-export DYNAMO_MODE=on
+# export PHOTOS_BUCKET=employee-photo-bucket-ef-24241
+# export AWS_DEFAULT_REGION=eu-central-1
+# export DYNAMO_MODE=on
 sudo systemctl daemon-reload
 systemctl start flask-server.service 
 #FLASK_APP=application.py /usr/local/bin/flask run --host=0.0.0.0 --port=80

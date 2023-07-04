@@ -13,6 +13,10 @@ import boto3
 import config
 import util
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 if "DYNAMO_MODE" in os.environ:
     import database_dynamo as database
 else:
