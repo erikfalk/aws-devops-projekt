@@ -12,11 +12,12 @@ import boto3
 
 import config
 import util
+import database_dynamo as database
 
-if "DYNAMO_MODE" in os.environ:
-    import database_dynamo as database
-else:
-    import database
+# if "DYNAMO_MODE" in os.environ:
+#     import database_dynamo as database
+# else:
+#     import database
 
 application = Flask(__name__)
 application.secret_key = config.FLASK_SECRET
@@ -30,7 +31,7 @@ except urllib.error.URLError:
     print(" * Instance metadata not available")
     doc = '{ "availabilityZone" : "us-fake-1a",  "instanceId" : "i-fakeabc" }'
 
-availablity_zone = json.loads(doc)["availabilityZone"]
+availablity_zone = 'eu-central-1'  #json.loads(doc)["availabilityZone"]
 instance_id = json.loads(doc)["instanceId"]
 
 badges = {
@@ -83,7 +84,7 @@ def home():
                 if "object_key" in employee and employee["object_key"]:
                     employee["signed_url"] = s3_client.generate_presigned_url(
                         'get_object',
-                        Params={'Bucket': config.PHOTOS_BUCKET, 'Key': employee["object_key"]}
+                        Params={'Bucket': 'employee-photo-bucket-ef-24241', 'Key': employee["object_key"]}
                     )
             except: 
                 pass
