@@ -4,4 +4,4 @@ if pgrep flask >/dev/null; then
   pkill flask
 else
   echo "Process flask does not exist."
-fi
+  
