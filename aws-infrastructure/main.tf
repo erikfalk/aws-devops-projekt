@@ -158,7 +158,7 @@ resource "aws_dynamodb_table" "employees" {
 resource "aws_s3_bucket" "employee-photo-bucket" {
   bucket        = "employee-photo-bucket-ef-24241"
   force_destroy = true
-  
+
 }
 
 resource "aws_s3_bucket_public_access_block" "app-s3-public-access" {
@@ -201,10 +201,10 @@ resource "aws_lb" "app-lb" {
 }
 
 resource "aws_lb_target_group" "app-target-group" {
-  name     = "app-target-group"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.app-vpc.id
+  name                 = "app-target-group"
+  port                 = 80
+  protocol             = "HTTP"
+  vpc_id               = aws_vpc.app-vpc.id
   deregistration_delay = 60
 
   health_check {
@@ -310,13 +310,14 @@ resource "aws_autoscaling_group" "app-auto-scaling-group" {
   health_check_type         = "ELB"
   health_check_grace_period = 90
   target_group_arns         = [aws_lb_target_group.app-target-group.arn]
+  vpc_zone_identifier       = [aws_subnet.subnets[0].id, aws_subnet.subnets[1].id]
+  suspended_processes       = ["AZRebalance", "AlarmNotification", "ScheduledActions", "ReplaceUnhealthy"]
+  default_cooldown          = 60
 
   launch_template {
     id      = aws_launch_template.app-server-launch-template.id
     version = "$Latest"
   }
-
-  vpc_zone_identifier = [aws_subnet.subnets[0].id, aws_subnet.subnets[1].id]
 
   tag {
     key                 = "Name"
