@@ -311,7 +311,7 @@ resource "aws_autoscaling_group" "app-auto-scaling-group" {
   health_check_grace_period = 90
   target_group_arns         = [aws_lb_target_group.app-target-group.arn]
   vpc_zone_identifier       = [aws_subnet.subnets[0].id, aws_subnet.subnets[1].id]
-  suspended_processes       = ["AZRebalance", "AlarmNotification", "ScheduledActions", "ReplaceUnhealthy"]
+  # suspended_processes       = ["AZRebalance", "AlarmNotification", "ScheduledActions", "ReplaceUnhealthy"]
   default_cooldown          = 60
 
   launch_template {
