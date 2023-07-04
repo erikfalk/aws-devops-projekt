@@ -1,2 +1,7 @@
 #!/bin/bash -ex
-sudo pkill flask
+if pgrep flask >/dev/null; then
+  echo "Process flask exists, killing it..."
+  pkill flask
+else
+  echo "Process flask does not exist."
+fi
