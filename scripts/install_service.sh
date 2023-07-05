@@ -1,0 +1,2 @@
+#!/bin/bash -ex
+cp FlaskApp/scripts/flask-server.service /etc/systemd/system
