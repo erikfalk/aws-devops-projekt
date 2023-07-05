@@ -205,7 +205,7 @@ resource "aws_lb_target_group" "app-target-group" {
   port                 = 80
   protocol             = "HTTP"
   vpc_id               = aws_vpc.app-vpc.id
-  deregistration_delay = 150
+  deregistration_delay = 90
 
   health_check {
     healthy_threshold   = 2
@@ -308,10 +308,10 @@ resource "aws_autoscaling_group" "app-auto-scaling-group" {
   max_size = var.max_instance_count
 
   health_check_type         = "ELB"
-  health_check_grace_period = 150
+  health_check_grace_period = 60
   target_group_arns         = [aws_lb_target_group.app-target-group.arn]
   vpc_zone_identifier       = [aws_subnet.subnets[0].id, aws_subnet.subnets[1].id]
-  default_cooldown          = 150
+  default_cooldown          = 60
 
   launch_template {
     id      = aws_launch_template.app-server-launch-template.id
