@@ -1,2 +1,2 @@
 #!/bin/bash -ex
-systemctl start flask-server.service
+systemctl stop flask-server.service
