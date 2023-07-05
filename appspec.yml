@@ -2,7 +2,9 @@ version: 0.0
 os: linux
 files:
   - source: /FlaskApp
+            /scripts/flask-server.service
     destination: /FlaskApp
+                 /etc/systemd/system
 hooks:
   ApplicationStop:
     - location: scripts/stop_app.sh
