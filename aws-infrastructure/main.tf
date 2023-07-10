@@ -297,7 +297,7 @@ variable "max_instance_count" {
 }
 
 variable "instance_name" {
-  description = "Prefix for instance names"
+  description = "name of instances"
   default     = "employee-dir-app-server"
 }
 
