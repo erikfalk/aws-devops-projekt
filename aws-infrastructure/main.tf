@@ -349,7 +349,7 @@ resource "aws_sns_topic" "app-server-scaling-topic" {
 resource "aws_sns_topic_subscription" "app-server-scalling-sub" {
   topic_arn = aws_sns_topic.app-server-scaling-topic.arn
   protocol  = "email"
-  endpoint  = "erik-falk@web.de"
+  endpoint  = ""
 }
 
 resource "aws_autoscaling_notification" "app-server-asg-notifications" {
