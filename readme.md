@@ -1,3 +1,3 @@
 # Open Campus 2023 AWS DevOps final project
 
-!(infrastructure-diagram.jpg)
+![infra-diagram](infrastructure-diagram.jpg)
